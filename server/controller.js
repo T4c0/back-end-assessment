@@ -1,4 +1,3 @@
-const { userGoals } = require("./userGoals");
 module.exports = {
   getCompliment: (req, res) => {
     const compliments = [
@@ -29,37 +28,20 @@ module.exports = {
     res.status(200).send(randomFortune);
   },
   getGoals: (req, res) => {
+    const userGoals = ["Graduate", "Find a job"];
     res.status(200).send(userGoals);
   },
-  addGoals: (req, res) => {
-    const { text } = req.body;
-  
-    if (text) {
-      const newGoal = {
-        id: userGoals.length + 1, // Assign a unique ID
-        text,
-      };
-      userGoals.push(newGoal);
-      res.json({ success: true, goal: newGoal });
+  updateGoal: (req, res) => {
+    const goalId = req.params.id;
+    const updatedGoal = req.body.updatedGoal;
+
+    // Find and update the goal with the given ID
+    const goalToUpdate = userGoals.find((goal) => goal.id === goalId);
+    if (goalToUpdate) {
+      goalToUpdate.goal = updatedGoal;
+      res.status(200).json({ message: "Goal updated successfully" });
     } else {
-      res.status(400).json({ error: "Invalid goal data" });
-    }
-  },
-  deleteGoal: (req, res) => {
-    const goalId = req.params.id; // Get the goal ID from the request parameters
-
-    console.log("Request Goal ID:",goalId)
-    // Find the index of the goal to delete
-    const goalIndex = userGoals.findIndex((goal) => goal.id === goalId);
-
-    if (goalIndex === -1) {
-      console.log('Goal not found:',goalId)
-      res.status(404).json({ error: "Goal not found" });
-    } else {
-      // Remove the goal from the userGoals array
-      const deletedGoal = userGoals.splice(goalIndex, 1)[0];
-
-      res.json({ success: true, deletedGoal });
+      res.status(404).json({ message: "Goal not found" });
     }
   },
 };
