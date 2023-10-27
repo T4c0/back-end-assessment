@@ -50,7 +50,7 @@ module.exports = {
 
     console.log("Request Goal ID:",goalId)
     // Find the index of the goal to delete
-    const goalIndex = userGoals.findIndex((goal) => goal.id === goalId);
+    const goalIndex = userGoals.findIndex((goal) => goal.id === parseInt(goalId,10));
 
     if (goalIndex === -1) {
       console.log('Goal not found:',goalId)
