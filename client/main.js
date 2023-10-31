@@ -1,6 +1,6 @@
 const complimentBtn = document.getElementById("complimentButton");
 const fortuneBtn = document.getElementById("getFortuneButton");
-const viewGoalsButton = document.getElementById("viewGoalsButton");
+const addGoalButton = document.getElementById("addGoalButton");
 
 const getCompliment = () => {
   axios.get("http://localhost:4000/api/compliment/").then((res) => {
@@ -15,51 +15,53 @@ const getFortune = () => {
     alert(data);
   });
 };
-const getGoals = () => {
-    fetch("/api/goals")
-    .then((response) => response.json())
-    .then((data) => {
-      const goalList = document.getElementById("goalList");
-      goalList.innerHTML = "";
-      data.forEach((goal) => {
+
+// Event listener to add a goal
+const addGoal = () => {
+  const goalText = goalInput.value.trim();
+
+  if (goalText !== "") {
+    axios
+      .post("http://localhost:4000/api/goals", { text: goalText })
+      .then((response) => {
+        const newGoal = response.data.goal;
         const li = document.createElement("li");
         li.innerHTML = `
-                  <span>${goal.text}</span>
-                  <button class="delete-button" data-id="${goal.id}">Delete</button>
-              `;
+          <span>${newGoal.text}</span>
+          <button class="delete-button" data-goalid="${newGoal.id}">Delete</button>
+        `;
 
         // Event listener to delete a goal
-        const deleteGoalButton = li.querySelector(".delete-button");
-        deleteGoalButton.addEventListener("click", () => {
-          deleteGoal(goal.id);
+        const deleteButton = li.querySelector(".delete-button");
+        deleteButton.addEventListener("click", function () {
+          const goalId = deleteButton.getAttribute("data-goalid");
+          deleteGoal(goalId, li);
         });
 
         goalList.appendChild(li);
+        goalInput.value = "";
+      })
+      .catch((error) => {
+        console.error(error);
       });
-    });
+  }
 };
 
-// Event listener to add a goal
-addGoalButton.addEventListener("click", function () {
-    const goalText = goalInput.value.trim();
-    if (goalText !== "") {
-      const li = document.createElement("li");
-      li.innerHTML = `
-                <span>${goalText}</span>
-                <button class="delete-button">Delete</button>
-            `;
-
-      // Event listener to delete a goal
-      const deleteButton = li.querySelector(".delete-button");
-      deleteButton.addEventListener("click", function () {
-        goalList.removeChild(li);
-      });
-
-      goalList.appendChild(li);
-      goalInput.value = "";
-    }
-  });
+function deleteGoal(goalId, listItem) {
+  console.log('Goal ID to delete:', goalId);
+  const deleteUrl = `http://localhost:4000/api/goals/${goalId}`;
+  console.log('DELETE URL:', deleteUrl);
+  axios
+    .delete(deleteUrl)
+    .then(() => {
+      // Remove the list item from the UI upon successful deletion
+      goalList.removeChild(listItem);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
 
 complimentBtn.addEventListener("click", getCompliment);
 fortuneBtn.addEventListener("click", getFortune);
-viewGoalsButton.addEventListener("click", getGoals);
+addGoalButton.addEventListener("click", addGoal);
